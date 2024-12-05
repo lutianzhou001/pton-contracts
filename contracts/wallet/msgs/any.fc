@@ -15,6 +15,8 @@
         try {
             ;; value is greater than ton amount to tokenize
             throw_unless(error::insufficient_gas, ctx.at(MSG_VALUE) > ton_amount);
+            ;; if the gas provided is not enough, the transaction will stop here and make the tons stuck in this contract
+            throw_unless(error::insufficient_gas, (ctx.at(MSG_VALUE) - ton_amount) > gas::wallet::process_fee);
             ;; check if payload is not empty
             throw_unless(error::invalid_body, in_msg_body.slice_bits() >= 1);
 

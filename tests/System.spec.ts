@@ -165,6 +165,7 @@ describe('System', () => {
         sendTon = async (params: SendParams) => {
             const sender = params.sender ?? admin
 
+            const oldBalance = await sender.getBalance()
             const oldData = await params.wallet.getWalletData()
 
             let msgResult = await params.wallet.sendTonTransfer(sender.getSender(), {
@@ -183,13 +184,16 @@ describe('System', () => {
                 });
             }
             const data = await params.wallet.getWalletData()
+            const balance = await sender.getBalance()
             if (params.expectBounce || params.expectRefund) {
+                if (params.expectRefund) {
+                    expect(oldBalance - balance).toBeLessThanOrEqual(params.tonAmount)
+                }
                 if (params.expectBounce) {
                     expectBounced(msgResult.events)
                 } else {
                     expectNotBounced(msgResult.events)
                 }
-
                 expect(data.balance).toEqual(oldData.balance)
             } else {
                 expectNotBounced(msgResult.events)
